@@ -23,7 +23,7 @@ size_t get_current_memory_kb() {
 
 void print_memory_usage(const char* phase) {
     size_t mem_kb = get_current_memory_kb();
-    printf("[内存监控] %-20s: %6lu KB\n", phase, mem_kb);
+    printf(" [内存监控] %-20s: %6lu KB\n", phase, mem_kb);
 }
 
 // ================== 拒绝采样法 ==================
@@ -82,7 +82,6 @@ LookupTable* init_lookup_table(double mu, double sigma, double threshold) {
     while (normal_pdf(upper_bound, mu, sigma , ρ2) < threshold) upper_bound--;
 
     int size = upper_bound - lower_bound + 1;
-    printf("查表范围: %d 到 %d (大小: %d)\n", lower_bound, upper_bound, size);
 
     LookupTable* table = (LookupTable*)malloc(sizeof(LookupTable));
     table->values = (int*)malloc(size * sizeof(int));
@@ -279,16 +278,13 @@ int get_user_choice() {
 
 int main() {
     srand((unsigned int)time(NULL));
-    print_memory_usage("程序启动后");
 
     const char* output_path = "C:/Users/17839/Desktop/Sample/samples.txt";
-    printf("整数高斯采样程序 (固定采样100万次)\n");
-    printf("--------------------------------\n");
 
     double mu, sigma;
-    printf(".请输入均值μ: ");
+    printf(" μ: ");
     scanf_s("%lf", &mu);
-    printf("请输入标准差σ: ");
+    printf(" σ: ");
     scanf_s("%lf", &sigma);
     clear_input_buffer();
 
@@ -310,9 +306,8 @@ int main() {
     }
     fprintf(file, "%.6f\n%.6f\n", mu, sigma);
 
-    printf("\n开始采样...\n");
+    printf("\n 开始采样...\n");
     clock_t start = clock();
-    print_memory_usage("采样开始前");
 
     for (int i = 0; i < NUM_SAMPLES; i++) {
         int sample = use_lookup ? sample_by_lookup(table) :
@@ -323,23 +318,18 @@ int main() {
         fprintf(file, "%d\n", sample);
 
         if (i % 100000 == 0 && i > 0) {
-            printf("已生成 %d 个样本...\n", i);
-            if (i % 200000 == 0) print_memory_usage("采样中");
+            printf(" 已生成 %d 个样本...\n", i);
+            if (i % 200000 == 0) print_memory_usage(" 采样中");
         }
     }
 
     clock_t end = clock();
     fclose(file);
 
-    printf("\n采样完成!\n");
-    printf("耗时: %.2f秒  速度: %.0f次/秒\n",
+    printf("\n 采样完成!\n");
+    printf(" 耗时: %.2f秒  速度: %.0f次/秒\n",
         (double)(end - start) / CLOCKS_PER_SEC,
         NUM_SAMPLES / ((double)(end - start) / CLOCKS_PER_SEC));
 
-    if (table) {
-        free_lookup_table(table);
-        print_memory_usage("释放查表后");
-    }
-    print_memory_usage("程序结束前");
     return 0;
 }
